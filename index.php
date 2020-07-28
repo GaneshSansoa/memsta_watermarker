@@ -9,6 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
        <!-- Bootstrap core CSS -->
        <link href="css/bootstrap.min.css" rel="stylesheet">
+	   <link href="css/croppr.min.css" rel="stylesheet"/>
         <!-- Custom styles for this template -->
         <link href="css/style.css" rel="stylesheet">
 		<style>
@@ -64,7 +65,8 @@
 						<div class="col-sm-6 col-6 mt-5 d-none" id="uploaded_img">
 							<h6>Uploaded Image</h6>
 							<img class="image1 d-none" src="img/background.jpeg" alt="medium image 1" />
-							<img class="image2 hidden img-fluid" alt="Meme Image will shown here" />
+							
+							<img class="image2 hidden img-fluid" id="croppr" alt="Meme Image will shown here" />
 							<img class="image3 d-none" src="img/watermark.jpeg" alt="medium image 2" />
 						</div>
 						<div class="col-sm-6 col-6 mt-5 d-none" id="generated_img">
@@ -79,6 +81,7 @@
 
                 </div>
                 <div class="col-sm-3">
+				<img class="test"/>
                 </div>
             </div>
             </div>        
@@ -106,10 +109,13 @@
     integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
     <script src="js/bootstrap.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/downloadjs/1.4.8/download.min.js" ></script>
+	<script src="js/croppr.min.js"></script>
     <script>
    
 
-    
+    var cropInstance = {};
+	var data = {};
+	var img_src = "";
         $(".custom-file-input").on("change", function() {
         var fileName = $(this).val().split("\\").pop();
         $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
@@ -123,24 +129,37 @@
 	  if (this.files[0]) {
 		reader.onload = function(e) {
 			console.log("add");
-		  imageIsLoaded(e, imageSelector)
+		  imageIsLoaded(e, imageSelector);
+		  
 		};
 		reader.readAsDataURL(this.files[0]);
+		
 	  }
 	});
 
 	$('.btn-merge').on('click', merge);
-
+		
+		
 	function imageIsLoaded(e, imageSelector) {
+		
 	  $(imageSelector).attr('src', e.target.result);
+	  img_src = e.target.result;
 	  $(imageSelector).removeClass('hidden');
 	  $("#uploaded_img").removeClass('d-none');
+	  cropInstance = cropInstance = new Croppr('#croppr', {
+			  // ...options
+	});
+	
 	};
 	$('#download').click(function() {
 			download($('.merged-image').attr('src'),"meme.jpg","image/jpeg"
 	);
 		  });
+	
 	function merge() {
+		data = cropInstance.getValue();
+		console.log(data);
+		console.log(img_src);
 	  var canvas = document.getElementById('canvas'),
 		ctx = canvas.getContext('2d'),
 		imageObj1 = new Image(),
@@ -155,14 +174,15 @@
 			ctx.font = "18pt Calibri";
 			ctx.fillStyle = "white";
 			 ctx.fillText("@memsta_official", 40, 40);
-		imageObj2.src = $('.image2').attr('src');
+		imageObj2.src = img_src;
 		imageObj2.onload = function() {
+			
 		  ctx.globalAlpha = 1;
-		  ctx.drawImage(imageObj2, 50, 50, 400, 400);
+		  ctx.drawImage(imageObj2,data.x,data.y,data.width,data.height, 50, 50, 400, 400);
 			imageObj3.src = $('.image3').attr('src');	
 				imageObj3.onload = function() {
 				ctx.globalAlpha = 0.5;
-				ctx.drawImage(imageObj3, 150, 150, 40, 40);
+				ctx.drawImage(imageObj3, 220, 220, 40, 40);
 				  var img = canvas.toDataURL('image/jpeg');
 				  $('.merged-image').attr('src', img);
 				  $('.merged-image').removeClass('hidden');	
