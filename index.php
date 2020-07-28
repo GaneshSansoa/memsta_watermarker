@@ -154,6 +154,9 @@
 	$('#download').click(function() {
 			download($('.merged-image').attr('src'),"meme.jpg","image/jpeg"
 	);
+	setTimeout(function(){
+		window.location.reload();
+	},2000)
 		  });
 	
 	function merge() {
